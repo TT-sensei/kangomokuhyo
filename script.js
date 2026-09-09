@@ -8,10 +8,14 @@ const selectedCount = document.querySelector("#selected-count");
 const clearButton = document.querySelector("#clear-button");
 const copyButton = document.querySelector("#copy-button");
 const copyStatus = document.querySelector("#copy-status");
+const goalSearch = document.querySelector("#goal-search");
+const clearSearch = document.querySelector("#clear-search");
+const searchStatus = document.querySelector("#search-status");
 
 let categories = [];
 let activeCategoryId = null;
 let selectedGoals = [];
+let searchQuery = "";
 let statusTimer;
 
 function goalText(goal) {
@@ -30,6 +34,10 @@ function isGoalSelected(categoryId, text) {
   return selectedGoals.some((goal) => goal.key === goalKey(categoryId, text));
 }
 
+function normalizeSearch(value) {
+  return value.trim().toLocaleLowerCase("ja-JP");
+}
+
 function renderCategories() {
   categoryList.replaceChildren(
     ...categories.map((category) => {
@@ -37,7 +45,7 @@ function renderCategories() {
       button.type = "button";
       button.className = "category-button";
       button.dataset.categoryId = category.id;
-      button.setAttribute("aria-pressed", String(category.id === activeCategoryId));
+      button.setAttribute("aria-pressed", String(category.id === activeCategoryId && !searchQuery));
 
       const icon = document.createElement("span");
       icon.className = "category-icon";
@@ -54,7 +62,12 @@ function renderCategories() {
       count.setAttribute("aria-label", `${category.goals.length}件`);
 
       button.append(icon, name, count);
-      button.addEventListener("click", () => selectCategory(category.id));
+      button.addEventListener("click", () => {
+        goalSearch.value = "";
+        searchQuery = "";
+        updateSearchControls();
+        selectCategory(category.id);
+      });
       return button;
     }),
   );
@@ -68,33 +81,118 @@ function selectCategory(categoryId) {
   renderGoals(category);
 }
 
+function createGoalButton(category, goal, index) {
+  const text = goalText(goal);
+  const selected = isGoalSelected(category.id, text);
+
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "goal-button";
+  button.dataset.goalIndex = String(index);
+  button.setAttribute("aria-pressed", String(selected));
+
+  const mark = document.createElement("span");
+  mark.className = "goal-mark";
+  mark.setAttribute("aria-hidden", "true");
+  mark.textContent = selected ? "✓" : "+";
+
+  const textNode = document.createElement("span");
+  textNode.className = "goal-text";
+  textNode.textContent = text;
+
+  button.append(mark, textNode);
+  button.addEventListener("click", () => toggleGoal(text, category));
+  return button;
+}
+
 function renderGoals(category) {
+  if (searchQuery) {
+    renderSearchResults();
+    return;
+  }
+
   goalsDescription.textContent = `「${category.name}」の文例です。いくつでも選べます。`;
   goalList.replaceChildren(
-    ...category.goals.map((goal, index) => {
+    ...category.goals.map((goal, index) => createGoalButton(category, goal, index)),
+  );
+}
+
+function renderSearchResults() {
+  const query = normalizeSearch(searchQuery);
+  const results = [];
+
+  categories.forEach((category) => {
+    category.goals.forEach((goal, index) => {
       const text = goalText(goal);
-      const selected = isGoalSelected(category.id, text);
+      if (text.toLocaleLowerCase("ja-JP").includes(query)) {
+        results.push({ category, goal, index });
+      }
+    });
+  });
 
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "goal-button";
-      button.dataset.goalIndex = String(index);
-      button.setAttribute("aria-pressed", String(selected));
+  goalsDescription.textContent = `「${searchQuery.trim()}」を含む目標を検索しています。`;
+  searchStatus.textContent = `${results.length}件の目標が見つかりました。`;
 
-      const mark = document.createElement("span");
-      mark.className = "goal-mark";
-      mark.setAttribute("aria-hidden", "true");
-      mark.textContent = selected ? "✓" : "+";
+  if (results.length === 0) {
+    goalList.innerHTML = '<p class="empty-message">該当する目標がありません。別の言葉で検索してみてください。</p>';
+    return;
+  }
 
-      const textNode = document.createElement("span");
-      textNode.className = "goal-text";
-      textNode.textContent = text;
+  goalList.replaceChildren(
+    ...results.map(({ category, goal, index }) => {
+      const wrapper = document.createElement("div");
+      wrapper.className = "search-result-item";
 
-      button.append(mark, textNode);
-      button.addEventListener("click", () => toggleGoal(text, category));
-      return button;
+      const categoryLabel = document.createElement("span");
+      categoryLabel.className = "search-result-category";
+      categoryLabel.textContent = category.name;
+
+      wrapper.append(categoryLabel, createGoalButton(category, goal, index));
+      return wrapper;
     }),
   );
+}
+
+function updateSearchControls() {
+  const hasQuery = Boolean(searchQuery);
+  clearSearch.hidden = !hasQuery;
+  if (!hasQuery) searchStatus.textContent = "";
+}
+
+function handleSearch() {
+  searchQuery = goalSearch.value;
+  updateSearchControls();
+
+  if (normalizeSearch(searchQuery)) {
+    renderSearchResults();
+  } else {
+    searchQuery = "";
+    const category = findCategory(activeCategoryId);
+    if (category) {
+      renderCategories();
+      renderGoals(category);
+    } else {
+      renderCategories();
+      goalsDescription.textContent = "左の分野を選ぶと、文例が表示されます。";
+      goalList.innerHTML = '<p class="empty-message">まずは左の分野を選んでください。</p>';
+    }
+  }
+}
+
+function clearSearchInput() {
+  goalSearch.value = "";
+  searchQuery = "";
+  updateSearchControls();
+  const category = findCategory(activeCategoryId);
+  if (category) {
+    renderCategories();
+    renderGoals(category);
+  } else {
+    renderCategories();
+    goalsDescription.textContent = "左の分野を選ぶと、文例が表示されます。";
+    goalList.innerHTML = '<p class="empty-message">まずは左の分野を選んでください。</p>';
+  }
+  goalSearch.focus();
 }
 
 function toggleGoal(text, category) {
@@ -112,7 +210,11 @@ function toggleGoal(text, category) {
     });
   }
 
-  renderGoals(category);
+  if (searchQuery) {
+    renderSearchResults();
+  } else {
+    renderGoals(category);
+  }
   updateSelectedGoals();
 }
 
@@ -165,15 +267,23 @@ function updateSelectedGoals() {
 
 function removeGoal(index) {
   selectedGoals.splice(index, 1);
-  const category = findCategory(activeCategoryId);
-  if (category) renderGoals(category);
+  if (searchQuery) {
+    renderSearchResults();
+  } else {
+    const category = findCategory(activeCategoryId);
+    if (category) renderGoals(category);
+  }
   updateSelectedGoals();
 }
 
 function clearGoals() {
   selectedGoals = [];
-  const category = findCategory(activeCategoryId);
-  if (category) renderGoals(category);
+  if (searchQuery) {
+    renderSearchResults();
+  } else {
+    const category = findCategory(activeCategoryId);
+    if (category) renderGoals(category);
+  }
   updateSelectedGoals();
   copyStatus.textContent = "";
 }
@@ -229,4 +339,6 @@ async function initialize() {
 
 clearButton.addEventListener("click", clearGoals);
 copyButton.addEventListener("click", copyGoals);
+goalSearch.addEventListener("input", handleSearch);
+clearSearch.addEventListener("click", clearSearchInput);
 initialize();
