@@ -28,6 +28,15 @@
     </header>
 
     <main id="main-content" class="app-shell">
+      <div class="search-area">
+        <label class="search-label" for="goal-search">🔍 目標を検索</label>
+        <div class="search-box">
+          <input id="goal-search" type="search" placeholder="例：あいさつ、そうじ、友達…" autocomplete="off" />
+          <button id="clear-search" class="search-clear" type="button" aria-label="検索をクリア" hidden>×</button>
+        </div>
+        <p id="search-status" class="search-status" aria-live="polite"></p>
+      </div>
+
       <div class="workspace">
         <aside class="panel category-panel" aria-labelledby="category-heading">
           <div class="panel-heading">
