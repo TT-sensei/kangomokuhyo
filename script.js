@@ -22,8 +22,12 @@ function findCategory(categoryId) {
   return categories.find((category) => category.id === categoryId);
 }
 
-function isGoalSelected(text) {
-  return selectedGoals.some((goal) => goal.text === text);
+function goalKey(categoryId, text) {
+  return `${categoryId}::${text}`;
+}
+
+function isGoalSelected(categoryId, text) {
+  return selectedGoals.some((goal) => goal.key === goalKey(categoryId, text));
 }
 
 function renderCategories() {
@@ -69,16 +73,18 @@ function renderGoals(category) {
   goalList.replaceChildren(
     ...category.goals.map((goal, index) => {
       const text = goalText(goal);
+      const selected = isGoalSelected(category.id, text);
+
       const button = document.createElement("button");
       button.type = "button";
       button.className = "goal-button";
       button.dataset.goalIndex = String(index);
-      button.setAttribute("aria-pressed", String(isGoalSelected(text)));
+      button.setAttribute("aria-pressed", String(selected));
 
       const mark = document.createElement("span");
       mark.className = "goal-mark";
       mark.setAttribute("aria-hidden", "true");
-      mark.textContent = isGoalSelected(text) ? "✓" : "+";
+      mark.textContent = selected ? "✓" : "+";
 
       const textNode = document.createElement("span");
       textNode.className = "goal-text";
@@ -92,12 +98,18 @@ function renderGoals(category) {
 }
 
 function toggleGoal(text, category) {
-  const index = selectedGoals.findIndex((goal) => goal.text === text);
+  const key = goalKey(category.id, text);
+  const index = selectedGoals.findIndex((goal) => goal.key === key);
 
   if (index >= 0) {
     selectedGoals.splice(index, 1);
   } else {
-    selectedGoals.push({ text, categoryId: category.id, categoryName: category.name });
+    selectedGoals.push({
+      key,
+      text,
+      categoryId: category.id,
+      categoryName: category.name,
+    });
   }
 
   renderGoals(category);
