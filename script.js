@@ -33,6 +33,17 @@ function renderRandomHeaderImage() {
   image.src = src;
   image.className = "navi-character";
   image.alt = alt;
+  image.style.display = "block";
+  image.style.height = "52px";
+  image.style.width = "auto";
+  image.style.maxWidth = "100%";
+  image.style.objectFit = "contain";
+  image.style.objectPosition = "right center";
+  headerVisuals.style.height = "60px";
+  headerVisuals.style.display = "flex";
+  headerVisuals.style.alignItems = "center";
+  headerVisuals.style.justifyContent = "flex-end";
+  headerVisuals.style.overflow = "hidden";
   headerVisuals.replaceChildren(image);
 }
 
@@ -220,19 +231,11 @@ function toggleGoal(text, category) {
   if (index >= 0) {
     selectedGoals.splice(index, 1);
   } else {
-    selectedGoals.push({
-      key,
-      text,
-      categoryId: category.id,
-      categoryName: category.name,
-    });
+    selectedGoals.push({ key, text, categoryId: category.id, categoryName: category.name });
   }
 
-  if (searchQuery) {
-    renderSearchResults();
-  } else {
-    renderGoals(category);
-  }
+  if (searchQuery) renderSearchResults();
+  else renderGoals(category);
   updateSelectedGoals();
 }
 
@@ -285,9 +288,8 @@ function updateSelectedGoals() {
 
 function removeGoal(index) {
   selectedGoals.splice(index, 1);
-  if (searchQuery) {
-    renderSearchResults();
-  } else {
+  if (searchQuery) renderSearchResults();
+  else {
     const category = findCategory(activeCategoryId);
     if (category) renderGoals(category);
   }
@@ -296,9 +298,8 @@ function removeGoal(index) {
 
 function clearGoals() {
   selectedGoals = [];
-  if (searchQuery) {
-    renderSearchResults();
-  } else {
+  if (searchQuery) renderSearchResults();
+  else {
     const category = findCategory(activeCategoryId);
     if (category) renderGoals(category);
   }
@@ -308,7 +309,6 @@ function clearGoals() {
 
 async function copyGoals() {
   if (selectedGoals.length === 0) return;
-
   const text = selectedGoals.map((goal) => goal.text).join("\n");
 
   try {
@@ -323,7 +323,6 @@ async function copyGoals() {
     textarea.select();
     const copied = document.execCommand("copy");
     textarea.remove();
-
     if (!copied) {
       copyStatus.textContent = "コピーできませんでした。選択した目標を手動でコピーしてください。";
       return;
@@ -341,12 +340,14 @@ async function copyGoals() {
 
 async function initialize() {
   renderRandomHeaderImage();
+  const headerInner = document.querySelector(".header-inner");
+  if (headerInner) headerInner.style.minHeight = "72px";
+
   try {
     const response = await fetch("data/goals.json");
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
     if (!Array.isArray(data.categories)) throw new Error("カテゴリーデータが不正です。");
-
     categories = data.categories;
     renderCategories();
     updateSelectedGoals();
