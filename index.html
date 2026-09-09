@@ -8,54 +8,81 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
+    <a class="skip-link" href="#main-content">本文へ移動</a>
+
     <header class="site-header">
-      <div class="container header-content">
-        <p class="eyebrow">SCHOOL GOAL MAKER</p>
-        <h1>看護目標メーカー</h1>
-        <p class="subtitle">学校生活にぴったりの目標を選ぼう</p>
+      <div class="header-inner">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">目</span>
+          <div>
+            <p class="brand-kicker">SCHOOL GOAL MAKER</p>
+            <h1>看護目標メーカー</h1>
+          </div>
+        </div>
+        <p class="header-note">学校生活にぴったりの目標を選ぼう</p>
       </div>
     </header>
 
-    <main class="container">
-      <section class="selected-goal" aria-labelledby="selected-heading">
-        <div class="selected-goal__heading">
-          <span class="step-label">STEP 3</span>
-          <h2 id="selected-heading">選んだ看護目標</h2>
+    <main id="main-content" class="app-shell">
+      <section class="intro-bar" aria-label="使い方">
+        <div>
+          <p class="section-number">HOW TO USE</p>
+          <h2>分野を選んで、目標を選ぶ</h2>
         </div>
-        <p id="selected-category" class="selected-category" hidden></p>
-        <p id="selected-text" class="selected-text" aria-live="polite">目標を選ぶと、ここに表示されます。</p>
-        <button id="copy-button" class="copy-button" type="button" disabled>
-          <span aria-hidden="true">⧉</span> コピーする
-        </button>
-        <p id="copy-status" class="copy-status" role="status" aria-live="polite"></p>
+        <p>目標は<strong>いくつでも選択OK</strong>。最後にまとめてコピーできます。</p>
       </section>
 
-      <section class="step-section" aria-labelledby="category-heading">
-        <div class="section-heading">
-          <span class="step-label">STEP 1</span>
-          <div>
-            <h2 id="category-heading">分野を選ぶ</h2>
-            <p>使いたい場面に近い分野を選んでください。</p>
+      <div class="workspace">
+        <aside class="panel category-panel" aria-labelledby="category-heading">
+          <div class="panel-heading">
+            <p class="section-number">01</p>
+            <h2 id="category-heading">分野</h2>
           </div>
-        </div>
-        <div id="category-list" class="category-grid" aria-label="看護目標の分野"></div>
-      </section>
+          <div id="category-list" class="category-list" aria-label="看護目標の分野"></div>
+        </aside>
 
-      <section class="step-section goals-section" aria-labelledby="goals-heading">
-        <div class="section-heading">
-          <span class="step-label">STEP 2</span>
-          <div>
-            <h2 id="goals-heading">看護目標を選ぶ</h2>
-            <p id="goals-description">分野を選ぶと、目標の候補が表示されます。</p>
+        <section class="panel goal-panel" aria-labelledby="goals-heading">
+          <div class="panel-heading goal-panel-heading">
+            <div>
+              <p class="section-number">02</p>
+              <h2 id="goals-heading">文例</h2>
+            </div>
+            <p id="goals-description" class="panel-description">左の分野を選ぶと、文例が表示されます。</p>
           </div>
-        </div>
-        <div id="goal-list" class="goal-list" aria-live="polite">
-          <p class="empty-message">まずは上の分野を選んでください。</p>
-        </div>
-      </section>
+          <p class="selection-hint"><span aria-hidden="true">＋</span> クリックして選択。もう一度押すと解除できます。</p>
+          <div id="goal-list" class="goal-list" aria-live="polite">
+            <p class="empty-message">まずは左の分野を選んでください。</p>
+          </div>
+        </section>
+
+        <aside class="panel selected-panel" aria-labelledby="selected-heading">
+          <div class="panel-heading selected-heading">
+            <div>
+              <p class="section-number">03</p>
+              <h2 id="selected-heading">選んだ目標</h2>
+            </div>
+            <span id="selected-count" class="count-badge" aria-label="選択数">0</span>
+          </div>
+
+          <div id="selected-list" class="selected-list" aria-live="polite">
+            <p class="selected-empty">まだ目標を選んでいません。</p>
+          </div>
+
+          <div class="selected-actions">
+            <button id="clear-button" class="button secondary full" type="button" disabled>すべて解除</button>
+            <button id="copy-button" class="button primary full" type="button" disabled>
+              <span aria-hidden="true">⧉</span> まとめてコピー
+            </button>
+            <p id="copy-status" class="copy-status" role="status" aria-live="polite"></p>
+          </div>
+        </aside>
+      </div>
     </main>
 
-    <footer class="site-footer">目標データは <code>data/goals.json</code> で管理しています。</footer>
+    <footer class="site-footer">
+      <p>看護目標のデータは <code>data/goals.json</code> で管理しています。</p>
+    </footer>
+
     <script src="script.js"></script>
   </body>
 </html>
