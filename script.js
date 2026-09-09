@@ -11,12 +11,30 @@ const copyStatus = document.querySelector("#copy-status");
 const goalSearch = document.querySelector("#goal-search");
 const clearSearch = document.querySelector("#clear-search");
 const searchStatus = document.querySelector("#search-status");
+const headerVisuals = document.querySelector("#header-visuals");
 
 let categories = [];
 let activeCategoryId = null;
 let selectedGoals = [];
 let searchQuery = "";
 let statusTimer;
+
+const headerImages = [
+  ["https://tt-sensei.github.io/navi-character-/assets/web/groups/daily/group-daily-arrival.webp", "登校・朝の出会い"],
+  ["https://tt-sensei.github.io/navi-character-/assets/web/groups/daily/group-daily-cleanup.webp", "掃除・協力"],
+  ["https://tt-sensei.github.io/navi-character-/assets/web/groups/daily/group-daily-classroom.webp", "教室・授業前の準備"],
+  ["https://tt-sensei.github.io/navi-character-/assets/web/groups/daily/group-daily-recess.webp", "休み時間・遊び"],
+];
+
+function renderRandomHeaderImage() {
+  if (!headerVisuals) return;
+  const [src, alt] = headerImages[Math.floor(Math.random() * headerImages.length)];
+  const image = document.createElement("img");
+  image.src = src;
+  image.className = "navi-character";
+  image.alt = alt;
+  headerVisuals.replaceChildren(image);
+}
 
 function goalText(goal) {
   return typeof goal === "string" ? goal : goal.text;
@@ -322,6 +340,7 @@ async function copyGoals() {
 }
 
 async function initialize() {
+  renderRandomHeaderImage();
   try {
     const response = await fetch("data/goals.json");
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
