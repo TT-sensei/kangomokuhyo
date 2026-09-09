@@ -11,7 +11,7 @@ const copyStatus = document.querySelector("#copy-status");
 const goalSearch = document.querySelector("#goal-search");
 const clearSearch = document.querySelector("#clear-search");
 const searchStatus = document.querySelector("#search-status");
-const headerVisuals = document.querySelector("#header-visuals");
+const headerVisuals = document.querySelector(".header-visuals");
 
 let categories = [];
 let activeCategoryId = null;
